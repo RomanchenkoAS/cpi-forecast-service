@@ -4,6 +4,7 @@ import pandas as pd
 import requests
 
 import config
+from tools import parse_dates
 
 URL = "https://rosstat.gov.ru/storage/mediabank/Nedel_ipc.xlsx"
 FILENAME = "Nedel_ipc.xlsx"
@@ -29,6 +30,39 @@ def get_data(url: str) -> None:
                 file.write(chunk)
 
     print(f"File downloaded successfully and saved to {file_path}")
+
+
+def xlsx_to_combined_data_csv(xlsx_file_path: str) -> pd.DataFrame:
+    """ Turn xlsx into dataframe """
+    xls = pd.ExcelFile(xlsx_file_path)
+    sheet_names = xls.sheet_names
+
+    pd.set_option('display.max_columns', 4)
+    pd.set_option('display.expand_frame_repr', False)
+
+    years = []
+
+    for sheet_name in sheet_names[1:]:
+        # Read the sheet into a DataFrame
+        df_current = pd.read_excel(xlsx_file_path, sheet_name=sheet_name, skiprows=3)
+
+        # Drop 'info' rows: where only first cell is filled
+        df_current = df_current[~df_current.iloc[:, 1:].isna().all(axis=1)]
+
+        # Transform str dates in header into datetime format
+        new_headers = [df_current.columns[0]] + [parse_dates(str(header), int(sheet_name)) for header in
+                                                 df_current.columns[1:]]
+        df_current.columns = new_headers
+
+        years.append(df_current)
+
+    combined_df = pd.concat([df.set_index('Наименование') for df in years], axis=1)
+    combined_df.sort_index(inplace=True)
+    filename = os.path.join(config.DATA_DIR, "train_data.csv")
+    combined_df.to_csv(filename)
+    print(f"Combined data saved successfully to {filename}")
+
+    return combined_df
 
 
 def xlsx_to_csv(xlsx_file_path: str) -> None:
@@ -70,6 +104,14 @@ def read_csvs(filename: str) -> pd.DataFrame:
     print(df)
 
 
+def compose_dataset():
+    pass
+
+
 if __name__ == "__main__":
     # create_csvs()
-    read_csvs(os.path.join(config.DATA_DIR, "2024.csv"))
+    # read_csvs(os.path.join(config.DATA_DIR, "2024.csv"))
+
+    # xlsx_to_dataframe(FILEPATH)
+
+    xlsx_to_combined_data_csv(FILEPATH)
