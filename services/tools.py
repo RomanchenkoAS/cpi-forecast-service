@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, date
 
 
@@ -34,3 +35,13 @@ def parse_dates(date_str: str, year: int) -> date:
     date_obj = datetime(year, month, day).date()
 
     return date_obj
+
+
+def slugify(value):
+    """
+        Converts to lowercase, removes non-word characters (alphanumerics and underscores)
+        and converts spaces to hyphens. Also strips leading and trailing whitespace.
+    """
+    value = re.sub(r'[^\w\s-]', '', value).strip().lower()
+    value = re.sub(r'[-\s]+', '-', value)
+    return value

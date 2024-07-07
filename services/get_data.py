@@ -109,7 +109,7 @@ def compose_dataset():
 
 
 if __name__ == "__main__":
-    # create_csvs()
+    create_csvs()
     # read_csvs(os.path.join(config.DATA_DIR, "2024.csv"))
 
     # xlsx_to_dataframe(FILEPATH)
