@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Price Forecast</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-        select, button { margin: 10px 0; padding: 5px; }
-        #forecast-image { max-width: 100%; height: auto; }
-    </style>
+    <script src="static/scripts.js"></script>
+    <link rel="stylesheet" href="static/styles.css">
 </head>
 <body>
+
 <h1>Price Forecast</h1>
 <select id="product-select">
     <option value="">Select a product</option>
@@ -21,29 +19,5 @@
     <img id="forecast-image" src="" alt="Forecast plot" style="display: none;">
 </div>
 
-<script>
-    $(document).ready(function() {
-        // Populate the product dropdown
-        $.get('/get_products', function(products) {
-            products.forEach(function(product) {
-                $('#product-select').append($('<option>', {
-                    value: product[1], // slugified product name
-                    text: product[0]  // original product name
-                }));
-            });
-        });
-
-        // Handle button click
-        $('#get-forecast').click(function() {
-            var selectedProduct = $('#product-select').val();
-            if (selectedProduct) {
-                var imageUrl = '/forecast/' + encodeURIComponent(selectedProduct) + '?t=' + new Date().getTime();
-                $('#forecast-image').attr('src', imageUrl).show();
-            } else {
-                alert('Please select a product');
-            }
-        });
-    });
-</script>
 </body>
 </html>
