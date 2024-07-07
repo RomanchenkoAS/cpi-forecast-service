@@ -102,6 +102,7 @@ def read_csvs(filename: str) -> pd.DataFrame:
 
     df = pd.read_csv(filename)
     print(df)
+    return df
 
 
 def compose_dataset():
