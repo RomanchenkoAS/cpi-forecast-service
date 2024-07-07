@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from flask import Flask, jsonify, render_template, send_file
+from matplotlib.ticker import MaxNLocator
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 from config import DATA_DIR, STATIC_DIR, TEMPLATES_DIR
 from services.tools import slugify_cyrillic_word
@@ -57,19 +59,65 @@ def get_model(product_name: str):
     return model
 
 
-def calculate_train_mae(model, data):
-    return -0.1
+def calculate_train_mae(model, train_data):
+    in_sample_forecast = model.fittedvalues
+    # Align the lengths
+    min_length = min(len(train_data['Price']), len(in_sample_forecast))
+    return mean_absolute_error(train_data['Price'][-min_length:], in_sample_forecast[-min_length:])
 
 
-def calculate_test_mae(model, data):
-    return 0.0
+def calculate_test_mae(model, test_data):
+    out_of_sample_forecast = model.forecast(steps=len(test_data))
+    return mean_absolute_error(test_data['Price'], out_of_sample_forecast)
 
 
 def calculate_rmse(model, data):
-    return 0.1
+    in_sample_forecast = model.fittedvalues
+    # Align the lengths
+    min_length = min(len(data['Price']), len(in_sample_forecast))
+    return mean_squared_error(data['Price'][-min_length:], in_sample_forecast[-min_length:], squared=False)
 
 
-@app.route("/forecast/<product_name>")
+def create_forecast_plot(data, forecast_dates, forecast, product_name, train_mae, test_mae, rmse):
+    plt.figure(figsize=(14, 7))
+    plt.plot(data["Date"], data["Price"], label="Historical Data", marker="o")
+    plt.plot(forecast_dates, forecast, label="Forecast", linestyle="--", marker="o")
+    plt.axhline(y=100, color='g', linestyle='--', label='100%')
+
+    plt.legend()
+    plt.title(f"Price Forecast for {product_name}")
+    plt.xlabel("Date")
+    plt.ylabel("Price Index")
+    plt.grid(True)
+    plt.xticks(rotation=45)
+
+    # Increase the granularity of the numbers on the x and y axes
+    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+    plt.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
+
+    # Add metrics to the plot
+    plt.text(
+        0.02,
+        0.98,
+        f"Train MAE: {train_mae:.2f}\nTest MAE: {test_mae:.2f}\nRMSE: {rmse:.2f}",
+        transform=plt.gca().transAxes,
+        verticalalignment="top",
+        fontsize=15,
+        bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
+    )
+
+    plt.tight_layout()
+
+    # Save plot to a byte buffer
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png")
+    buf.seek(0)
+    plt.close()
+
+    return buf
+
+
+@app.route('/forecast/<product_name>')
 def get_forecast_plot(product_name):
     data = load_data(product_name)
     model = get_model(product_name)
@@ -94,55 +142,25 @@ def get_forecast_plot(product_name):
     rmse = calculate_rmse(model, data)
 
     # Create plot
-    plt.figure(figsize=(14, 7))
-    plt.plot(data["Date"], data["Price"], label="Historical Data", marker="o")
-    plt.plot(forecast_dates, forecast, label="Forecast", linestyle="--", marker="o")
-    plt.legend()
-    plt.title(f"Price Forecast for {product_name}")
-    plt.xlabel("Date")
-    plt.ylabel("Price Index")
-    plt.grid(True)
-    plt.xticks(rotation=45)
-
-    # Set y-axis to start from an appropriate value
-    # y_min = min(data['Price'].min(), min(forecast)) * 0.95  # 5% below the minimum
-    # y_max = max(data['Price'].max(), max(forecast)) * 1.05  # 5% above the maximum
-    # plt.ylim(y_min, y_max)
-
-    # Add metrics to the plot
-    plt.text(
-        0.02,
-        0.98,
-        f"Train MAE: {train_mae:.2f}\nTest MAE: {test_mae:.2f}\nRMSE: {rmse:.2f}",
-        transform=plt.gca().transAxes,
-        verticalalignment="top",
-        fontsize=10,
-        bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
-    )
-
-    plt.tight_layout()
-
-    # Save plot to a byte buffer
-    buf = io.BytesIO()
-    plt.savefig(buf, format="png")
-    buf.seek(0)
-    plt.close()
+    buf = create_forecast_plot(data, forecast_dates, forecast, product_name, train_mae, test_mae, rmse)
 
     return send_file(buf, mimetype="image/png")
 
 
-@app.route("/get_products")
+@app.route('/get_products')
 def get_products():
+    """ Endpoint to fill filter """
     data = pd.read_csv(os.path.join(DATA_DIR, "price_data_long.csv"))
-    products = data["Product"].unique().tolist()
-    return jsonify(products)
+    products = data['Product'].unique()
+
+    # Create a list of pairs (original product name, slugified product name)
+    product_pairs = [(prod, slugify_cyrillic_word(prod)) for prod in products]
+
+    return jsonify(product_pairs)
 
 
 @app.route("/")
 def index():
-    # return render_template(os.path.join(TEMPLATES_DIR, "index.html"))
-    # TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
-
     return render_template("index.html")
 
 

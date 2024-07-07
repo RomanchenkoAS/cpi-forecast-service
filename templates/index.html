@@ -27,8 +27,8 @@
         $.get('/get_products', function(products) {
             products.forEach(function(product) {
                 $('#product-select').append($('<option>', {
-                    value: product,
-                    text: product
+                    value: product[1], // slugified product name
+                    text: product[0]  // original product name
                 }));
             });
         });
