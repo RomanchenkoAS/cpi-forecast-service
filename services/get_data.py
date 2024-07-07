@@ -2,9 +2,9 @@ import os
 
 import pandas as pd
 import requests
+from tools import parse_dates
 
 import config
-from tools import parse_dates
 
 URL = "https://rosstat.gov.ru/storage/mediabank/Nedel_ipc.xlsx"
 FILENAME = "Nedel_ipc.xlsx"
@@ -12,7 +12,7 @@ FILEPATH = os.path.join(config.DATA_DIR, FILENAME)
 
 
 def get_data(url: str) -> None:
-    """ Download stats sheet from Rosstat website """
+    """Download stats sheet from Rosstat website"""
     if not os.path.isdir(config.DATA_DIR):
         os.makedirs(config.DATA_DIR)
 
@@ -24,7 +24,7 @@ def get_data(url: str) -> None:
     file_path = os.path.join(config.DATA_DIR, url.split("/")[-1])
 
     # Open the file in binary write mode
-    with open(file_path, 'wb') as file:
+    with open(file_path, "wb") as file:
         for chunk in response.iter_content(chunk_size=8192):
             if chunk:
                 file.write(chunk)
@@ -33,12 +33,12 @@ def get_data(url: str) -> None:
 
 
 def xlsx_to_combined_data_csv(xlsx_file_path: str) -> pd.DataFrame:
-    """ Turn xlsx into dataframe """
+    """Turn xlsx into dataframe"""
     xls = pd.ExcelFile(xlsx_file_path)
     sheet_names = xls.sheet_names
 
-    pd.set_option('display.max_columns', 4)
-    pd.set_option('display.expand_frame_repr', False)
+    pd.set_option("display.max_columns", 4)
+    pd.set_option("display.expand_frame_repr", False)
 
     years = []
 
@@ -50,13 +50,15 @@ def xlsx_to_combined_data_csv(xlsx_file_path: str) -> pd.DataFrame:
         df_current = df_current[~df_current.iloc[:, 1:].isna().all(axis=1)]
 
         # Transform str dates in header into datetime format
-        new_headers = [df_current.columns[0]] + [parse_dates(str(header), int(sheet_name)) for header in
-                                                 df_current.columns[1:]]
+        new_headers = [df_current.columns[0]] + [
+            parse_dates(str(header), int(sheet_name))
+            for header in df_current.columns[1:]
+        ]
         df_current.columns = new_headers
 
         years.append(df_current)
 
-    combined_df = pd.concat([df.set_index('Наименование') for df in years], axis=1)
+    combined_df = pd.concat([df.set_index("Наименование") for df in years], axis=1)
     combined_df.sort_index(inplace=True)
     filename = os.path.join(config.DATA_DIR, "train_data.csv")
     combined_df.to_csv(filename)
@@ -66,7 +68,7 @@ def xlsx_to_combined_data_csv(xlsx_file_path: str) -> pd.DataFrame:
 
 
 def xlsx_to_csv(xlsx_file_path: str) -> None:
-    """ Turn xlsx into csvs """
+    """Turn xlsx into csvs"""
     xls = pd.ExcelFile(xlsx_file_path)
     sheet_names = xls.sheet_names
 
