@@ -16,8 +16,6 @@ RUN poetry config virtualenvs.create false \
 
 COPY ./ /app
 
-RUN mkdir -p "data/trained_models"
-
 EXPOSE 8000
 
 CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "app:app"]

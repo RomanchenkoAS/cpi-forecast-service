@@ -9,7 +9,7 @@ import pandas as pd
 from matplotlib.ticker import MaxNLocator
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-from config import DATA_DIR
+from config import DATA_DIR, MODELS_DIR
 from services.tools import slugify_cyrillic_word
 
 
@@ -39,7 +39,7 @@ def constrain_forecast(original, forecast, max_change=0.05):
 
 def get_model(product_name):
     model_filename = f"{product_name.replace(' ', '_')}_model.pkl"
-    model_path = os.path.join(DATA_DIR, "trained_models", model_filename)
+    model_path = os.path.join(MODELS_DIR, model_filename)
     with open(model_path, "rb") as f:
         model = pickle.load(f)
     return model
