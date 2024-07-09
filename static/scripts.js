@@ -1,11 +1,17 @@
 $(document).ready(function() {
     // Populate the product dropdown
     $.get('/get_products', function(products) {
-        products.forEach(function(product) {
-            $('#product-select').append($('<option>', {
+        products.forEach(function(product, index) {
+            var option = $('<option>', {
                 value: product[1], // slugified product name
                 text: product[0]  // original product name
-            }));
+            });
+            $('#product-select').append(option);
+
+            // Set the first option as selected
+            if (index === 0) {
+                option.attr('selected', 'selected');
+            }
         });
     });
 
