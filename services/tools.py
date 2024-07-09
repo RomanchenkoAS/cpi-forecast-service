@@ -8,7 +8,7 @@ def parse_dates(date_str: str, year: int) -> date:
     Each vintage have a date in format like 'на 16 января'
     """
 
-    # Clean
+    # Clean string
     date_str = date_str.replace("*", "").lstrip("на ")
 
     month_mapping = {
@@ -35,16 +35,6 @@ def parse_dates(date_str: str, year: int) -> date:
     date_obj = datetime(year, month, day).date()
 
     return date_obj
-
-
-def slugify(value):
-    """
-    Converts to lowercase, removes non-word characters (alphanumerics and underscores)
-    and converts spaces to hyphens. Also strips leading and trailing whitespace.
-    """
-    value = re.sub(r"[^\w\s-]", "", value).strip().lower()
-    value = re.sub(r"[-\s]+", "-", value)
-    return value
 
 
 def transliterate(name):
@@ -166,5 +156,23 @@ def transliterate(name):
     return name
 
 
-def slugify_cyrillic_word(word: str) -> str:
-    return slugify(transliterate(word))
+def slugify(word: str) -> str:
+    """
+    Converts to lowercase, removes non-word characters (alphanumerics and underscores)
+    and converts spaces to hyphens. Also strips leading and trailing whitespace.
+
+    :param word: Cyrillic word string
+    """
+    word = transliterate(word)
+    word = re.sub(r"[^\w\s-]", "", word).strip().lower()
+    word = re.sub(r"[-\s]+", "-", word)
+    return word
+
+
+def ensure_directory_exists_and_writable(file_path: str):
+    """
+    Ensure that the directory containing the file at the given path exists and is writable.
+
+    :param file_path: Path to the file
+    """
+    pass

@@ -15,7 +15,7 @@ from services.forecast import (
     get_model,
     load_data,
 )
-from services.tools import slugify_cyrillic_word
+from services.tools import slugify
 
 forecast_bp = Blueprint("forecast", __name__)
 

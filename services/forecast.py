@@ -10,13 +10,13 @@ from matplotlib.ticker import MaxNLocator
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 from config import DATA_DIR, MODELS_DIR
-from services.tools import slugify_cyrillic_word
+from services.tools import slugify
 
 
 def load_data(product_name):
     data = pd.read_csv(os.path.join(DATA_DIR, "price_data_long.csv"))
     product_mapping = {
-        slugify_cyrillic_word(prod): prod for prod in data["Product"].unique()
+        slugify(prod): prod for prod in data["Product"].unique()
     }
     original_product_name = product_mapping.get(product_name)
     if original_product_name is None:
