@@ -9,6 +9,7 @@ from services.tools import print_full_df
 from datetime import datetime
 from services.tools import slugify
 import gc
+import warnings
 
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error
@@ -45,14 +46,16 @@ def split_data(df: pd.DataFrame, split_coefficient: float = 0.15) -> tuple[pd.Da
 
 def make_forecast(product_name: str, train_data: pd.DataFrame, test_data: pd.DataFrame,
                   use_train_test_split: bool = True, save_model: bool = False, show_plot: bool = False):
+    # Filter out the specific warnings
+    warnings.filterwarnings("ignore", message="No supported index is available.")
+    warnings.filterwarnings("ignore", message="An unsupported index was provided and will be")
+
     product_train_data = train_data[train_data['Product'] == product_name]
     product_test_data = test_data[test_data['Product'] == product_name]
 
     # Sort the data by date
     product_train_data = product_train_data.sort_values(by='Date')
     product_test_data = product_test_data.sort_values(by='Date')
-
-    print(f"Plotting for {product_name}") # logger.info
 
     if use_train_test_split:
         # Use only training data for model fitting
@@ -70,8 +73,8 @@ def make_forecast(product_name: str, train_data: pd.DataFrame, test_data: pd.Dat
             train_mae = mean_absolute_error(product_train_data['Price'], in_sample_forecast)
             test_mae = mean_absolute_error(product_test_data['Price'], out_of_sample_forecast)
 
-            print(f"Model {product_name} | Train MAE: {train_mae}") # logger.info
-            print(f"Model {product_name} | Test MAE: {test_mae}") # logger.info
+            print(f"Model {product_name} | Train MAE: {train_mae}")  # logger.info
+            print(f"Model {product_name} | Test MAE: {test_mae}")  # logger.info
 
             plt.figure(figsize=(14, 7))
             plt.plot(product_train_data['Date'], product_train_data['Price'], label='Training Data', marker='o')
@@ -84,14 +87,13 @@ def make_forecast(product_name: str, train_data: pd.DataFrame, test_data: pd.Dat
         model = ExponentialSmoothing(combined_data['Price'], trend='add', seasonal='add', seasonal_periods=12)
         model_fit = model.fit()
 
-        # Plot
         if show_plot:
             # In-sample forecast
             in_sample_forecast = model_fit.fittedvalues
 
             # Calculate evaluation metrics
             mae = mean_absolute_error(combined_data['Price'], in_sample_forecast)
-            print(f"Model {product_name} | In-sample MAE: {mae}") # logger.info
+            print(f"Model {product_name} | In-sample MAE: {mae}")  # logger.info
             plt.figure(figsize=(14, 7))
             plt.plot(combined_data['Date'], combined_data['Price'], label='Historical Data', marker='o')
             plt.plot(combined_data['Date'], in_sample_forecast, label='In-sample Forecast', linestyle='--')
@@ -104,6 +106,8 @@ def make_forecast(product_name: str, train_data: pd.DataFrame, test_data: pd.Dat
 
     if show_plot:
         # Plot future forecast
+        print(f"Plotting for {product_name}")  # logger.info
+
         plt.plot(forecast_dates, forecast, label='Next 28 Weeks Forecast', linestyle='--', marker='o')
 
         plt.legend()
@@ -118,7 +122,7 @@ def make_forecast(product_name: str, train_data: pd.DataFrame, test_data: pd.Dat
 
     # Save the model
     if save_model:
-        model_filename = f"{slugify(product_name)}_model.pkl"
+        model_filename = f"{product_name}.pkl"
         model_path = os.path.join(config.MODELS_DIR, model_filename)
         with open(model_path, 'wb') as f:
             pickle.dump(model_fit, f)
@@ -128,6 +132,11 @@ def main():
     file_name = os.path.join(config.DATA_DIR, 'train_data.csv')
     df = pd.read_csv(file_name, index_col=0, dtype={'Price': float}, parse_dates=['Date'])
     dev_data, test_data = split_data(df, 0.15)
+    products = dev_data['Product'].unique()
+
+    for product in products:
+        print(f"Creating model for product {product}")  # logger.info
+        make_forecast(product, dev_data, test_data, use_train_test_split=True, save_model=True, show_plot=False)
 
 
 if __name__ == "__main__":
