@@ -1,7 +1,6 @@
 from flask import Flask
 
 from config import STATIC_DIR, TEMPLATES_DIR
-
 from endpoints.forecast import forecast_bp
 from endpoints.main import main_bp
 from endpoints.products import products_bp

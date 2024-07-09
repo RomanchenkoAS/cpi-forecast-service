@@ -14,10 +14,11 @@ from services.tools import slugify
 
 
 def load_data(product_name):
+    """
+    From csv with all data get data for product_name
+    """
     data = pd.read_csv(os.path.join(DATA_DIR, "price_data_long.csv"))
-    product_mapping = {
-        slugify(prod): prod for prod in data["Product"].unique()
-    }
+    product_mapping = {slugify(prod): prod for prod in data["Product"].unique()}
     original_product_name = product_mapping.get(product_name)
     if original_product_name is None:
         raise ValueError(f"No product found matching '{product_name}'")
@@ -26,6 +27,9 @@ def load_data(product_name):
 
 
 def constrain_forecast(original, forecast, max_change=0.05):
+    """
+    Limit predictions to a certain threshold
+    """
     constrained = [original.iloc[-1]]
     for f in forecast:
         change = (f - constrained[-1]) / constrained[-1]
@@ -37,25 +41,15 @@ def constrain_forecast(original, forecast, max_change=0.05):
     return constrained[1:]
 
 
-def get_model(product_name):
-    model_filename = f"{product_name.replace(' ', '_')}_model.pkl"
+def get_model_dict(product_name):
+    """
+    Load model from disk and return it as a dictionary
+    """
+    model_filename = f"{slugify(product_name)}.pkl"
     model_path = os.path.join(MODELS_DIR, model_filename)
     with open(model_path, "rb") as f:
         model = pickle.load(f)
     return model
-
-
-def calculate_train_mae(model, train_data):
-    in_sample_forecast = model.fittedvalues
-    min_length = min(len(train_data["Price"]), len(in_sample_forecast))
-    return mean_absolute_error(
-        train_data["Price"][-min_length:], in_sample_forecast[-min_length:]
-    )
-
-
-def calculate_test_mae(model, test_data):
-    out_of_sample_forecast = model.forecast(steps=len(test_data))
-    return mean_absolute_error(test_data["Price"], out_of_sample_forecast)
 
 
 def calculate_rmse(model, data):

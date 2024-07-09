@@ -1,21 +1,15 @@
-import io
-import os
 from datetime import datetime
 
-import matplotlib.pyplot as plt
 import pandas as pd
-from flask import Blueprint, jsonify, send_file
+from flask import Blueprint, send_file
 
 from services.forecast import (
     calculate_rmse,
-    calculate_test_mae,
-    calculate_train_mae,
     constrain_forecast,
     create_forecast_plot,
-    get_model,
+    get_model_dict,
     load_data,
 )
-from services.tools import slugify
 
 forecast_bp = Blueprint("forecast", __name__)
 
@@ -23,7 +17,9 @@ forecast_bp = Blueprint("forecast", __name__)
 @forecast_bp.route("/forecast/<product_name>")
 def get_forecast_plot(product_name):
     data = load_data(product_name)
-    model = get_model(product_name)
+    model_dict = get_model_dict(product_name)
+
+    model = model_dict["model"]
 
     forecast_horizon = 28
     last_date = datetime.strptime(data["Date"].max(), "%Y-%m-%d")
@@ -35,12 +31,13 @@ def get_forecast_plot(product_name):
 
     data["Date"] = pd.to_datetime(data["Date"])
 
-    train_mae = calculate_train_mae(model, data)
-    test_mae = calculate_test_mae(model, data)
+    train_mae = model_dict["train_mae"]
+    test_mae = model_dict["test_mae"]
     rmse = calculate_rmse(model, data)
+    plot_title = model_dict["product_name"]
 
     buf = create_forecast_plot(
-        data, forecast_dates, forecast, product_name, train_mae, test_mae, rmse
+        data, forecast_dates, forecast, plot_title, train_mae, test_mae, rmse
     )
 
     return send_file(buf, mimetype="image/png")

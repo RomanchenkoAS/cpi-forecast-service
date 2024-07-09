@@ -2,9 +2,9 @@ import os
 
 import pandas as pd
 import requests
+from tools import ensure_directory_exists_and_writable, parse_dates
 
 import config
-from tools import ensure_directory_exists_and_writable, parse_dates
 
 
 def download_data_sheet(url: str, path: str = config.DATA_DIR) -> str:
@@ -20,7 +20,9 @@ def download_data_sheet(url: str, path: str = config.DATA_DIR) -> str:
     response = requests.get(url, stream=True)
 
     if response.status_code != 200:
-        raise RuntimeError(f"Failed to download file. Status code: {response.status_code}")
+        raise RuntimeError(
+            f"Failed to download file. Status code: {response.status_code}"
+        )
 
     file_path = os.path.join(config.DATA_DIR, "data.xlsx")
 

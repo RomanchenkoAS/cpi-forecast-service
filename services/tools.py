@@ -121,8 +121,9 @@ def ensure_directory_exists_and_writable(file_path: str):
 #     df = pd.read_csv(file_name)
 #     return df
 
+
 def print_full_df(df: pd.DataFrame):
-    pd.set_option('display.max_rows', None)
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.width', None)
+    pd.set_option("display.max_rows", None)
+    pd.set_option("display.max_columns", None)
+    pd.set_option("display.width", None)
     print(df)
