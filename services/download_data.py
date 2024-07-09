@@ -45,11 +45,7 @@ def xlsx_to_csv(xlsx_file_path: str) -> str:
     xls = pd.ExcelFile(xlsx_file_path)
     sheet_names = xls.sheet_names
 
-    pd.set_option("display.max_columns", 4)
-    pd.set_option("display.expand_frame_repr", False)
-
     years = []
-
     for sheet_name in sheet_names[1:]:
         # Read the sheet into a DataFrame
         df_current = pd.read_excel(xlsx_file_path, sheet_name=sheet_name, skiprows=3)
@@ -76,9 +72,9 @@ def xlsx_to_csv(xlsx_file_path: str) -> str:
 
 
 def main():
-    URL = config.ROSSTAT_CPI_DATA_URL
+    data_download_url = config.ROSSTAT_CPI_DATA_URL
 
-    file_path_xlsx = download_data_sheet(URL, config.DATA_DIR)
+    file_path_xlsx = download_data_sheet(data_download_url, config.DATA_DIR)
     file_path_csv = xlsx_to_csv(file_path_xlsx)
 
 
