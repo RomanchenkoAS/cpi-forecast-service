@@ -1,5 +1,8 @@
+import os
 import re
 from datetime import date, datetime
+
+import pandas as pd
 
 
 def parse_dates(date_str: str, year: int) -> date:
@@ -78,76 +81,6 @@ def transliterate(name):
         "э": "e",
         "ю": "u",
         "я": "ja",
-        "А": "A",
-        "Б": "B",
-        "В": "V",
-        "Г": "G",
-        "Д": "D",
-        "Е": "E",
-        "Ё": "E",
-        "Ж": "ZH",
-        "З": "Z",
-        "И": "I",
-        "Й": "I",
-        "К": "K",
-        "Л": "L",
-        "М": "M",
-        "Н": "N",
-        "О": "O",
-        "П": "P",
-        "Р": "R",
-        "С": "S",
-        "Т": "T",
-        "У": "U",
-        "Ф": "F",
-        "Х": "H",
-        "Ц": "C",
-        "Ч": "CZ",
-        "Ш": "SH",
-        "Щ": "SCH",
-        "Ъ": "",
-        "Ы": "y",
-        "Ь": "b",
-        "Э": "E",
-        "Ю": "U",
-        "Я": "YA",
-        ",": ",",
-        "?": "?",
-        " ": "_",
-        "~": "~",
-        "!": "!",
-        "@": "@",
-        "#": "#",
-        "$": "$",
-        "%": "%",
-        "^": "^",
-        "&": "&",
-        "*": "*",
-        "(": "(",
-        ")": ")",
-        "-": "-",
-        "=": "=",
-        "+": "+",
-        ":": ":",
-        ";": ";",
-        "<": "<",
-        ">": ">",
-        "'": "'",
-        '"': '"',
-        "\\": "\\",
-        "/": "/",
-        "№": "#",
-        "[": "[",
-        "]": "]",
-        "{": "{",
-        "}": "}",
-        "ґ": "r",
-        "ї": "r",
-        "є": "e",
-        "Ґ": "g",
-        "Ї": "i",
-        "Є": "e",
-        "—": "-",
     }
 
     # Циклически заменяем все буквы в строке
@@ -163,8 +96,8 @@ def slugify(word: str) -> str:
 
     :param word: Cyrillic word string
     """
-    word = transliterate(word)
-    word = re.sub(r"[^\w\s-]", "", word).strip().lower()
+    word = transliterate(word.lower())
+    word = re.sub(r"[^\w\s-]", "", word).strip()
     word = re.sub(r"[-\s]+", "-", word)
     return word
 
@@ -176,3 +109,20 @@ def ensure_directory_exists_and_writable(file_path: str):
     :param file_path: Path to the file
     """
     pass
+
+
+# def read_csv(file_name: str) -> pd.DataFrame:
+#     """
+#     Read csv file to dataframe
+#     """
+#     if not os.path.isfile(file_name):
+#         raise RuntimeError(f"The file '{file_name}' does not exist.")
+#
+#     df = pd.read_csv(file_name)
+#     return df
+
+def print_full_df(df: pd.DataFrame):
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.width', None)
+    print(df)
