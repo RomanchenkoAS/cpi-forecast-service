@@ -1,13 +1,14 @@
 import os
-import os
 import pickle
 import warnings
 from datetime import datetime
+from typing import Any
 
 import matplotlib.pyplot as plt
-import mplcursors
+import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_absolute_error
+from statsmodels.stats.stattools import medcouple
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
 import config
@@ -53,7 +54,7 @@ def make_forecast(
         use_train_test_split: bool = True,
         save_model: bool = False,
         show_plot: bool = False,
-) -> None:
+) -> dict[str, Any]:
     """
     Create 6 months forecast models on provided data.
 
@@ -62,7 +63,8 @@ def make_forecast(
     :param test_data: Test data dataframe.
     :param use_train_test_split: Whether to use train and test splits or use whole dataset.
     :param save_model: Save trained model to .pkl.
-    :param show_plot: Display forecast plot
+    :param show_plot: Display forecast plot.
+    :return: Dictionary with model and metadata.
     """
 
     # Filter out the specific warnings
@@ -102,8 +104,8 @@ def make_forecast(
             product_test_data["Price"], out_of_sample_forecast
         )
 
-        print(f"Model {product_name} | Train MAE: {train_mae}")  # logger.info
-        print(f"Model {product_name} | Test MAE: {test_mae}")  # logger.info
+        # print(f"Model {product_name} | Train MAE: {train_mae}")  # logger.info
+        # print(f"Model {product_name} | Test MAE: {test_mae}")  # logger.info
 
         if show_plot:
             plt.figure(figsize=(14, 7))
@@ -146,7 +148,7 @@ def make_forecast(
 
         # Calculate evaluation metrics
         train_mae = mean_absolute_error(combined_data["Price"], in_sample_forecast)
-        print(f"Model {product_name} | In-sample MAE: {train_mae}")  # logger.info
+        # print(f"Model {product_name} | In-sample MAE: {train_mae}")  # logger.info
 
         if show_plot:
             plt.figure(figsize=(14, 7))
@@ -175,6 +177,31 @@ def make_forecast(
     )
     forecast = model_fit.forecast(steps=forecast_horizon)
 
+    # Calculate prediction intervals
+    alpha = 0.05  # 95% confidence interval
+    mean_squared_error = np.mean(model_fit.resid ** 2)
+    standard_error = np.sqrt(mean_squared_error * (1 + np.arange(1, forecast_horizon + 1)))
+    critical_value = 1.96  # Approximation for 95% CI (can use 1.645 for 90% CI)
+    lower_ci = forecast - critical_value * standard_error
+    upper_ci = forecast + critical_value * standard_error
+
+    # Calculate average confidence interval width for forecast
+    avg_ci_width_forecast = np.mean(upper_ci - lower_ci)
+    max_ci_width_forecast = np.max(upper_ci - lower_ci)
+
+    # Calculate in-sample confidence intervals
+    residuals = model_fit.resid
+    scale = np.median(np.abs(residuals - np.median(residuals)))
+    mc = medcouple(residuals)
+    z = 1.96  # for 95% confidence interval
+
+    lower_in_sample_ci = in_sample_forecast - z * scale * np.exp(-mc * (residuals < 0))
+    upper_in_sample_ci = in_sample_forecast + z * scale * np.exp(mc * (residuals > 0))
+
+    # Calculate average confidence interval width for in-sample forecast
+    avg_ci_width_in_sample = np.mean(upper_in_sample_ci - lower_in_sample_ci)
+    max_ci_width_in_sample = np.max(upper_in_sample_ci - lower_in_sample_ci)
+
     if show_plot:
         # Plot future forecast
         print(f"Plotting for {product_name}")  # logger.info
@@ -194,24 +221,33 @@ def make_forecast(
         plt.grid(True)
         plt.xticks(rotation=45)
         plt.tight_layout()
-        mplcursors.cursor(hover=True)
         plt.show()
 
-    # Save the model with metadata
-    if save_model:
-        model_info = {
-            "model": model_fit,
-            "url": f"/forecast/{slugify(product_name)}",
-            "product_name": product_name,
-            "train_mae": train_mae if train_mae else None,
-            "test_mae": test_mae if test_mae else None,
-            "date_created": datetime.now(),
-        }
+    model_metadata = {
+        "model": model_fit,
+        "url": f"/forecast/{slugify(product_name)}",
+        "product_name": product_name,
+        "train_mae": train_mae if train_mae else None,
+        "test_mae": test_mae if test_mae else None,
+        "date_created": datetime.now(),
+        # "forecast": forecast.tolist(),
+        # "forecast_dates": [date.strftime('%Y-%m-%d') for date in forecast_dates],
+        "avg_forecast_ci_width": float(avg_ci_width_forecast),
+        "max_forecast_ci_width": float(max_ci_width_forecast),
+        # "in_sample_forecast": in_sample_forecast.tolist(),
+        # "in_sample_dates": [date.strftime('%Y-%m-%d') for date in in_sample_dates],
+        "avg_in_sample_ci_width": float(avg_ci_width_in_sample),
+        "max_in_sample_ci_width": float(max_ci_width_in_sample),
+    }
 
+    # Save the model
+    if save_model:
         model_filename = f"{slugify(product_name)}.pkl"
         model_path = os.path.join(config.MODELS_DIR, model_filename)
         with open(model_path, "wb") as f:
-            pickle.dump(model_info, f)
+            pickle.dump(model_metadata, f)
+
+    return model_metadata
 
 
 def main():
