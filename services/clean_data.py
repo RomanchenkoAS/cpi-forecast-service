@@ -3,7 +3,6 @@ import os
 import pandas as pd
 
 import config
-from services.tools import print_full_df
 
 
 def clean_data(file_name: str) -> pd.DataFrame:
@@ -52,6 +51,8 @@ def main():
     df = clean_data(file_name)
     df_long = wide_to_long(df)
     df_long.to_csv(os.path.join(config.DATA_DIR, "train_data.csv"))
+
+    print(f"Data cleaned and saved to {config.DATA_DIR}/train_data.csv")
 
 
 if __name__ == "__main__":

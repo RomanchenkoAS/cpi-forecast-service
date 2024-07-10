@@ -1,4 +1,4 @@
-import gc
+import os
 import os
 import pickle
 import warnings
@@ -11,11 +11,11 @@ from sklearn.metrics import mean_absolute_error
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
 import config
-from services.tools import print_full_df, slugify
+from services.tools import slugify
 
 
 def split_data(
-    df: pd.DataFrame, split_coefficient: float = 0.15
+        df: pd.DataFrame, split_coefficient: float = 0.15
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Split data into dev and test sets.
@@ -47,13 +47,24 @@ def split_data(
 
 
 def make_forecast(
-    product_name: str,
-    train_data: pd.DataFrame,
-    test_data: pd.DataFrame,
-    use_train_test_split: bool = True,
-    save_model: bool = False,
-    show_plot: bool = False,
-):
+        product_name: str,
+        train_data: pd.DataFrame,
+        test_data: pd.DataFrame,
+        use_train_test_split: bool = True,
+        save_model: bool = False,
+        show_plot: bool = False,
+) -> None:
+    """
+    Create 6 months forecast models on provided data.
+
+    :param product_name: Name of the product in "Product" column.
+    :param train_data: Training data dataframe.
+    :param test_data: Test data dataframe.
+    :param use_train_test_split: Whether to use train and test splits or use whole dataset.
+    :param save_model: Save trained model to .pkl.
+    :param show_plot: Display forecast plot
+    """
+
     # Filter out the specific warnings
     warnings.filterwarnings("ignore", message="No supported index is available.")
     warnings.filterwarnings(

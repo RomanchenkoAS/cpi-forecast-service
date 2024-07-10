@@ -2,9 +2,9 @@ import os
 
 import pandas as pd
 import requests
-from tools import ensure_directory_exists_and_writable, parse_dates
 
 import config
+from tools import ensure_directory_exists_and_writable, parse_dates
 
 
 def download_data_sheet(url: str, path: str = config.DATA_DIR) -> str:
@@ -78,6 +78,8 @@ def main():
 
     file_path_xlsx = download_data_sheet(data_download_url, config.DATA_DIR)
     file_path_csv = xlsx_to_csv(file_path_xlsx)
+
+    print(f"Data downloaded to {file_path_csv}")
 
 
 if __name__ == "__main__":
