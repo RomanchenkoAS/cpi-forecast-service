@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPI Forecast</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #333; }
+        .option { margin-bottom: 20px; border: 1px solid #ddd; padding: 20px; border-radius: 5px; }
+        button { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; cursor: pointer; margin-right: 10px; }
+        .requirements { background-color: #f9f9f9; padding: 10px; margin-top: 10px; }
+    </style>
+    <link rel="icon" type="image/png" sizes="32x32" href="static/icon.svg">
+</head>
+<body>
+    <h1>Welcome to Consumer Price Index (CPI) Forecast</h1>
+
+    <div class="option">
+        <h2>Option 1: Use Automatically Downloaded Data</h2>
+        <p>We'll fetch the latest data from Goskomstat for you.</p>
+        <button onclick="fetchModels()">Proceed with Auto-Download</button>
+    </div>
+
+    <div class="option">
+        <h2>Option 2: Upload Custom CSV</h2>
+        <p>Upload your own CSV file with consumer price index data.</p>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv" required>
+            <button type="submit">Upload and Proceed</button>
+        </form>
+        <div class="requirements">
+            <h3>CSV Requirements:</h3>
+            <ul>
+                <li>First column: Product names</li>
+                <li>Subsequent columns: Dates in format YYYY-MM-DD</li>
+                <li>Values should be numeric, representing price indices</li>
+                <li>UTF-8 encoding</li>
+                <li>Comma-separated values</li>
+            </ul>
+        </div>
+        <button onclick="window.location.href='/download-sample'">Download Sample Data</button>
+    </div>
+
+    <script>
+        function fetchModels() {
+            fetch('/models')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success === true) {
+                        window.location.href = '/plot';
+                    } else {
+                        alert('Error while creating models: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('Error while creating models: ' + error);
+                });
+        }
+    </script>
+</body>
+</html>
