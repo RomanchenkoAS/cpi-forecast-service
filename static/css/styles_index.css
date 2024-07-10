@@ -70,6 +70,11 @@ button {
     color: #006600;
 }
 
+.info {
+    background-color: #c1ebff;
+    color: #0017cc;
+}
+
 .footer {
     background-color: #f8f9fa;
     padding: 10px 0;

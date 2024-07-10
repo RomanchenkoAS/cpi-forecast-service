@@ -98,6 +98,7 @@ def erase_models():
             elif os.path.isdir(file_path):
                 os.rmdir(file_path)
 
+        flash("Models successfully deleted.", "info")
         return jsonify({"success": True}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400

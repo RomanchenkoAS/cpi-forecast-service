@@ -21,6 +21,7 @@ $(document).ready(function () {
     }
 });
 
+
 function getForecast() {
     var productName = $('#product-select').val();
     if (productName) {
@@ -70,12 +71,16 @@ function handleResponse(data) {
     if (data.success === true) {
         window.location.href = '/plot';
     } else {
-        alert('Error: ' + data.error);
+        handleError(data.Error)
     }
 }
 
+
 function handleError(error) {
-    alert('Error: ' + error);
+    const message_box = document.getElementById('message-placeholder');
+    message_box.style.display = 'block';
+    message_box.className = 'message error';
+    message_box.textContent = 'Error: ' + error;
 }
 
 function eraseModels() {
@@ -83,13 +88,13 @@ function eraseModels() {
         .then(response => response.json())
         .then(data => {
             if (data.success === true) {
-                alert('Models erased successfully');
+                // alert('Models erased successfully');
                 location.reload();
             } else {
-                alert('Error while erasing models: ' + data.error);
+                handleError(data.error);
             }
         })
         .catch(error => {
-            alert('Error while erasing models: ' + error);
+            handleError(error);
         });
 }
