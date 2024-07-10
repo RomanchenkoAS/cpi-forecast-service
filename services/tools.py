@@ -1,4 +1,6 @@
+import os
 import re
+import stat
 from datetime import date, datetime
 
 import pandas as pd
@@ -101,13 +103,35 @@ def slugify(word: str) -> str:
     return word
 
 
-def ensure_directory_exists_and_writable(file_path: str):
+def ensure_directory_exists_and_writable(dir_path: str):
     """
-    Ensure that the directory containing the file at the given path exists and is writable.
+    Ensure that the directory at the given path exists and is writable.
+    If the directory exists but is not writable, modify its permissions.
 
-    :param file_path: Path to the file
+    :param dir_path: Path to the directory
     """
-    pass
+    # Check if the directory exists
+    if not os.path.exists(dir_path):
+        try:
+            # Create the directory
+            os.makedirs(dir_path)
+            print(f"Directory '{dir_path}' created.")  # logger.info
+        except Exception as e:
+            raise PermissionError(f"Unable to create directory '{dir_path}': {e}")
+
+    # Check if the directory is writable
+    if not os.access(dir_path, os.W_OK):
+        try:
+            # Modify directory permissions to be writable
+            os.chmod(dir_path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
+            print(f"Permissions of directory '{dir_path}' have been modified to be writable.")  # logger.info
+        except Exception as e:
+            raise PermissionError(f"Unable to modify permissions of directory '{dir_path}': {e}")
+
+    if os.access(dir_path, os.W_OK):
+        print(f"Directory '{dir_path}' is writable.")  # logger.info
+    else:
+        raise PermissionError(f"Directory '{dir_path}' is not writable after attempting to modify permissions.")
 
 
 # def read_csv(file_name: str) -> pd.DataFrame:
