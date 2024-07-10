@@ -9,7 +9,6 @@ from services.generate_models import split_data, make_forecast
 from services.tools import ensure_directory_exists_and_writable
 
 
-# Download data from URL
 def auto_process_data(data_download_url: str = None) -> None:
     """
     Combined script to download/read data, clean it and generate models.

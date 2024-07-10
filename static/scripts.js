@@ -71,10 +71,9 @@ function handleResponse(data) {
     if (data.success === true) {
         window.location.href = '/plot';
     } else {
-        handleError(data.Error)
+        handleError(data.error);
     }
 }
-
 
 function handleError(error) {
     const message_box = document.getElementById('message-placeholder');

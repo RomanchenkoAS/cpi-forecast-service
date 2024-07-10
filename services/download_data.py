@@ -32,6 +32,9 @@ def download_data_sheet(url: str, path: str = config.DATA_DIR) -> str:
             if chunk:
                 file.write(chunk)
 
+    # Set file permissions
+    os.chmod(file_path, 0o600)
+
     print(f"File downloaded successfully and saved to {file_path}")
 
     return file_path

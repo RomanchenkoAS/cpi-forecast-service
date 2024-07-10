@@ -62,7 +62,10 @@ def create_models():
 
         if file and file.filename.endswith('.csv'):
             file.save(config.DATA_FILE_PATH)
-            auto_process_data()
+            try:
+                auto_process_data()
+            except Exception as e:
+                return jsonify({"success": False, "error": str(e)})
             return jsonify({"success": True}), 200
         else:
             return jsonify({"success": False, "error": "Invalid file type. Only CSV files are allowed."}), 400
@@ -71,7 +74,10 @@ def create_models():
         # Custom URL from user: this feature is not implemented on front-end.
         download_url = request.args.get("url", config.ROSSTAT_CPI_DATA_URL)
         try:
-            auto_process_data(data_download_url=download_url)
+            try:
+                auto_process_data(data_download_url=download_url)
+            except Exception as e:
+                return jsonify({"success": False, "error": str(e)})
             return jsonify({"success": True}), 200
         except Exception as e:
             return jsonify({"success": False, "error": str(e)}), 500
