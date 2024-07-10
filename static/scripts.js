@@ -1,7 +1,7 @@
-$(document).ready(function() {
-    // Populate the product dropdown
-    $.get('/get_products', function(products) {
-        products.forEach(function(product, index) {
+$(document).ready(function () {
+    // Load product list
+    $.getJSON('/get_products', function (products) {
+        products.forEach(function (product, index) {
             var option = $('<option>', {
                 value: product[1], // slugified product name
                 text: product[0]  // original product name
@@ -15,14 +15,23 @@ $(document).ready(function() {
         });
     });
 
-    // Handle button click
-    $('#get-forecast').click(function() {
-        var selectedProduct = $('#product-select').val();
-        if (selectedProduct) {
-            var imageUrl = '/forecast/' + encodeURIComponent(selectedProduct) + '?t=' + new Date().getTime();
-            $('#forecast-image').attr('src', imageUrl).show();
-        } else {
-            alert('Please select a product');
+    $('#get-forecast').click(function () {
+        var productName = $('#product-select').val();
+        if (productName) {
+            // Get metadata
+            $.getJSON('/get_metadata/' + encodeURIComponent(productName), function (metadata) {
+                var metadataHtml = `
+                            <h6>Metadata:</h6>
+                            <p>Product: ${metadata.product_name}</p>
+                            <p>Train MAE: ${metadata.train_mae.toFixed(2)}</p>
+                            <p>Test MAE: ${metadata.test_mae.toFixed(2)}</p>
+                            <p>Date Created: ${new Date(metadata.date_created).toLocaleString()}</p>
+                        `;
+                $('#metadata').html(metadataHtml);
+            });
+
+            // Load forecast image
+            $('#forecast-image').attr('src', '/forecast/' + encodeURIComponent(productName)).show();
         }
     });
 });
