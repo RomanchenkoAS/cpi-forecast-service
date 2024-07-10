@@ -41,22 +41,41 @@ function getForecast() {
     }
 }
 
-function fetchModels() {
-    document.getElementById('loader').style.display = 'inline-block';
-    fetch('/models')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('loader').style.display = 'none';
-            if (data.success === true) {
-                window.location.href = '/plot';
-            } else {
-                alert('Error while creating models: ' + data.error);
-            }
+function fetchModels(type) {
+    const loader = document.getElementById(`loader-${type}`);
+    loader.style.display = 'inline-block';
+
+    if (type === 'auto') {
+        fetch('/models')
+            .then(response => response.json())
+            .then(handleResponse)
+            .catch(handleError)
+            .finally(() => loader.style.display = 'none');
+    } else if (type === 'upload') {
+        const form = document.getElementById('upload-form');
+        const formData = new FormData(form);
+
+        fetch('/models', {
+            method: 'POST',
+            body: formData
         })
-        .catch(error => {
-            document.getElementById('loader').style.display = 'none';
-            alert('Error while creating models: ' + error);
-        });
+            .then(response => response.json())
+            .then(handleResponse)
+            .catch(handleError)
+            .finally(() => loader.style.display = 'none');
+    }
+}
+
+function handleResponse(data) {
+    if (data.success === true) {
+        window.location.href = '/plot';
+    } else {
+        alert('Error: ' + data.error);
+    }
+}
+
+function handleError(error) {
+    alert('Error: ' + error);
 }
 
 function eraseModels() {

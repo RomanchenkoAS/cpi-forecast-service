@@ -1,57 +1,60 @@
 {% extends "base.html" %}
 {% block title %}CPI Forecast{% endblock title %}
 {% block head %}
-{{ super() }}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/styles_index.css') }}">
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles_index.css') }}">
 {% endblock %}
 
 {% block content %}
 
-<h1>Welcome to Consumer Price Index (CPI) Forecast</h1>
+    <h1>Welcome to Consumer Price Index (CPI) Forecast</h1>
 
-<!-- Flash messages -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-{% for category, message in messages %}
-<div class="message {{ category }}">{{ message }}</div>
-{% endfor %}
-{% endif %}
-{% endwith %}
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
-{% if models_available %}
-<div class="option">
-    <h2>Models Status</h2>
-    <p>Models are ready for use.</p>
-    <button onclick="window.location.href='/plot'">Go to Plots</button>
-    <button onclick="eraseModels()">Erase Models</button>
-</div>
-{% endif %}
+    <div class="message error" style="display: none" id="message-placeholder"></div>
 
-<div class="option">
-    <h2>Option 1: Use Automatically Downloaded Data</h2>
-    <p>We'll fetch the latest data from Goskomstat for you.</p>
-    <button onclick="fetchModels()">Proceed with Auto-Download</button>
-    <div class="loader" id="loader"></div>
-</div>
+    {% if models_available %}
+        <div class="option">
+            <h2>Models Status</h2>
+            <p>Models are ready for use.</p>
+            <button onclick="window.location.href='/plot'">Go to Plots</button>
+            <button onclick="eraseModels()">Erase Models</button>
+        </div>
+    {% endif %}
 
-<div class="option">
-    <h2>Option 2: Upload Custom CSV</h2>
-    <p>Upload your own CSV file with consumer price index data.</p>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept=".csv" required>
-        <button type="submit">Upload and Proceed</button>
-    </form>
-    <div class="requirements">
-        <h3>CSV Requirements:</h3>
-        <ul>
-            <li>First column: Product names</li>
-            <li>Subsequent columns: Dates in format YYYY-MM-DD</li>
-            <li>Values should be numeric, representing price indices</li>
-            <li>UTF-8 encoding</li>
-            <li>Comma-separated values</li>
-        </ul>
+    <div class="option">
+        <h2>Option 1: Use Automatically Downloaded Data</h2>
+        <p>We'll fetch the latest data from Goskomstat for you.</p>
+        <button onclick="fetchModels('auto')">Proceed with Auto-Download</button>
+        <div class="loader" id="loader-auto"></div>
     </div>
-    <button onclick="window.location.href='/download-sample'">Download Sample Data</button>
-</div>
+
+    <div class="option">
+        <h2>Option 2: Upload Custom CSV</h2>
+        <p>Upload your own CSV file with consumer price index data.</p>
+        <form id="upload-form" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv" required>
+            <button type="button" onclick="fetchModels('upload')">Upload and Proceed</button>
+            <div class="loader" id="loader-upload"></div>
+        </form>
+        <div class="requirements">
+            <h3>CSV Requirements:</h3>
+            <ul>
+                <li>First column: Product names</li>
+                <li>Subsequent columns: Dates in format YYYY-MM-DD</li>
+                <li>Values should be numeric, representing price indices</li>
+                <li>UTF-8 encoding</li>
+                <li>Comma-separated values</li>
+            </ul>
+        </div>
+        <button onclick="window.location.href='/download-sample'">Download Sample Data</button>
+    </div>
 
 {% endblock content %}

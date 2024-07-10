@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 import pandas as pd
 
@@ -10,19 +9,25 @@ from services.generate_models import split_data, make_forecast
 from services.tools import ensure_directory_exists_and_writable
 
 
-def auto_process_data(data_download_url: str) -> None:
+# Download data from URL
+def auto_process_data(data_download_url: str = None) -> None:
     """
-    Combined script to download data, clean it and generate models.
+    Combined script to download/read data, clean it and generate models.
 
     :param data_download_url: Rosstat data sheet url. Default is at config.py.
+        If this parameter is None, the script will try to load data from the data dir.
     """
-    # data_download_url = config.ROSSTAT_CPI_DATA_URL
 
-    file_path_xlsx = download_data_sheet(data_download_url, config.DATA_DIR)
-    file_path_csv = xlsx_to_csv(file_path_xlsx)
+    # Get data either from web or from disk
+    if data_download_url is not None:
+        file_path_xlsx = download_data_sheet(data_download_url, config.DATA_DIR)
+        file_path_csv = xlsx_to_csv(file_path_xlsx)
 
-    print(f"Data downloaded to {file_path_csv}")  # logger.info
+        print(f"Data downloaded to {file_path_csv}")  # logger.info
+    else:
+        file_path_csv = config.DATA_FILE_PATH
 
+    # Clean and process the data
     df = clean_data(file_path_csv)
     df_long = wide_to_long(df)
 
