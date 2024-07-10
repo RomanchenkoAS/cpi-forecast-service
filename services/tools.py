@@ -1,9 +1,12 @@
+import glob
 import os
 import re
 import stat
 from datetime import date, datetime
 
 import pandas as pd
+
+import config
 
 
 def parse_dates(date_str: str, year: int) -> date:
@@ -153,3 +156,19 @@ def print_full_df(df: pd.DataFrame) -> None:
     pd.set_option("display.max_columns", None)
     pd.set_option("display.width", None)
     print(df)
+
+
+def check_models_availability() -> bool:
+    """
+    Check if the CSV file exists and is readable, and if there are .pkl files in the models directory.
+
+    :return: True if both conditions are met, False otherwise
+    """
+    # Check if the CSV file exists and is readable
+    data_file_exists = os.path.isfile(config.DATA_FILE_PATH) and os.access(config.DATA_FILE_PATH, os.R_OK)
+
+    # Check if there are .pkl files in the models directory
+    model_files = glob.glob(os.path.join(config.MODELS_DIR, "*.pkl"))
+    models_available = len(model_files) > 0
+
+    return data_file_exists and models_available
