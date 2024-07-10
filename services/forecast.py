@@ -9,6 +9,7 @@ import pandas as pd
 from matplotlib.ticker import MaxNLocator
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
+import config
 from config import DATA_DIR, MODELS_DIR
 from services.tools import slugify
 
@@ -17,7 +18,7 @@ def load_data(product_name):
     """
     From csv with all data get data for product_name
     """
-    data = pd.read_csv(os.path.join(DATA_DIR, "price_data_long.csv"))
+    data = pd.read_csv(config.DATA_FILE_PATH)
     product_mapping = {slugify(prod): prod for prod in data["Product"].unique()}
     original_product_name = product_mapping.get(product_name)
     if original_product_name is None:

@@ -26,7 +26,8 @@ def auto_process_data(data_download_url: str) -> None:
     df = clean_data(file_path_csv)
     df_long = wide_to_long(df)
 
-    file_path = os.path.join(config.DATA_DIR, f"train_data_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.csv")
+    # file_path = os.path.join(config.DATA_DIR, f"train_data_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.csv")
+    file_path = os.path.join(config.DATA_FILE_PATH)
     df_long.to_csv(file_path)
 
     print(f"Data cleaned and saved to {file_path}")  # logger.info
