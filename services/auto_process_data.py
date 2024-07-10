@@ -7,6 +7,7 @@ import config
 from services.clean_data import clean_data, wide_to_long
 from services.download_data import download_data_sheet, xlsx_to_csv
 from services.generate_models import split_data, make_forecast
+from services.tools import ensure_directory_exists_and_writable
 
 
 def auto_process_data(data_download_url: str) -> None:
@@ -35,6 +36,9 @@ def auto_process_data(data_download_url: str) -> None:
     )
     dev_data, test_data = split_data(df, 0.15)
     products = dev_data["Product"].unique()
+
+    # Prepare directory
+    ensure_directory_exists_and_writable(config.MODELS_DIR)
 
     for product in products:
         print(f"Creating model for product {product}")  # logger.info
