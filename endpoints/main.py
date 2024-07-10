@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, request, jsonify, redirect, url_fo
 from werkzeug.exceptions import HTTPException
 
 import config
+from services.auto_process_data import auto_process_data
 from services.tools import check_models_availability
 
 main_bp = Blueprint("main", __name__)
@@ -17,10 +18,11 @@ def plot():
         flash("Models unavailable", "error")
         return redirect(url_for("main.index"))
 
-
 @main_bp.route("/")
 def index():
     models_available = check_models_availability()
+    if models_available:
+        flash("Models are ready", "success")
     return render_template("index.html", models_available=models_available)
 
 
@@ -45,7 +47,7 @@ def create_models():
         # This feature is not implemented on front-end yet.
         download_url = request.args.get("url", config.ROSSTAT_CPI_DATA_URL)
         try:
-            # auto_process_data(data_download_url=download_url)
+            auto_process_data(data_download_url=download_url)
             return jsonify({"success": True}), 200
         except Exception as e:
             return jsonify({"success": False, "error": str(e)}), 500
