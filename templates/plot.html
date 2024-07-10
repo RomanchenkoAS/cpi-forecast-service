@@ -3,17 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CPI Forecast</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>Price Forecast</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="static/scripts.js"></script>
+    <link rel="stylesheet" href="static/styles.css">
 </head>
 <body>
-<h1>CPI Forecast</h1>
-{% for plot in plots %}
-<div id="chart{{loop.index}}"></div>
-<script>
-    var graphs = {{plot | safe}};
-    Plotly.plot('chart{{loop.index}}', graphs, {});
-</script>
-{% endfor %}
+
+<h1>Price Forecast</h1>
+<select id="product-select">
+    <option value="">Select a product</option>
+</select>
+<button id="get-forecast">Get Forecast</button>
+<div id="forecast-container">
+    <img id="forecast-image" src="" alt="Forecast plot" style="display: none;">
+</div>
+
 </body>
 </html>
