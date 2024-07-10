@@ -1,4 +1,3 @@
-import os
 import re
 from datetime import date, datetime
 
@@ -122,7 +121,10 @@ def ensure_directory_exists_and_writable(file_path: str):
 #     return df
 
 
-def print_full_df(df: pd.DataFrame):
+def print_full_df(df: pd.DataFrame) -> None:
+    """
+    Configure pandas to display dataframe in full.
+    """
     pd.set_option("display.max_rows", None)
     pd.set_option("display.max_columns", None)
     pd.set_option("display.width", None)
