@@ -18,9 +18,9 @@ services:
     image: nginx:latest
     build:
       context: ./nginx
-      args:
-        - NGINX_USER=${NGINX_USER}
-        - NGINX_PASSW=${NGINX_PASSW}
+#      args:
+#        - NGINX_USER=${NGINX_USER}
+#        - NGINX_PASSW=${NGINX_PASSW}
     restart: always
     container_name: reverse_proxy
     ports:
