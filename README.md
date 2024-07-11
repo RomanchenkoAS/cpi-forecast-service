@@ -2,10 +2,25 @@
 
 This is a web app that uses ML to forecast Consumer Prices Indicies (CPI)
 
-- This work states that best performance (lowest RMCE) for forecasting CPI data is shown by Elastic Net model (p5.1)
-- https://www.bis.org/ifc/publ/ifcb57_18.pdf
+# Установка и запуск
 
-- Using seasonal adjustments lower RMSE estimated by ~10% (p5.4)
+- Подготовьте файл .env, пример заполнения - в файле .env.example
+- Замените переменные на подходящие, установите SECRET_KEY. Для того что бы сгенерировать ключ можно выполнить:
+
+```python
+from uuid import uuid4
+
+print(uuid4().hex)
+```
+
+- Заполненный .env разместите в корневой директории проекта
+- Запустите контейнеры командой:
+```bash
+  docker compose up -d --build
+```
+
+- Сайт запустится по умолчанию на http://127.0.0.1/ (без указания порта)
+
 
 # TODO
 
@@ -14,13 +29,14 @@ This is a web app that uses ML to forecast Consumer Prices Indicies (CPI)
     - [x] Скачка образца данных
 - [x] Создавать все нужные директории при запуске проекта
 - [x] Оценка доверительного интервала в метаданных
-  - [ ] Вынести доверительные интервалы на фронте
+  - [x] Вынести доверительные интервалы на фронте
 - [x] Превратить алерт "модели удалены" в flash
 - [x] Добавить ориентировочное время загрузки
 - [x] Убрать все NotImplemented error
 - [x] Удалить старый _get_data.py
-- [ ] Показать доверительный интервал в метаданных
-- [ ] Добавить кеширование запросов для получения метадаты и графичков
+- [x] Показать доверительный интервал в метаданных
+- [x] Закинуть секреты в .env
+- [x] Добавить кеширование запросов для получения метадаты и графичков
 - [ ] Фиксануть верстку странички индекс
 - [ ] Отрефакторить
 - [x] Почистить зависимости
@@ -106,3 +122,13 @@ flask:  2.0.3
 ### Сроки выполнения
 
 - Проект должен быть выполнен и представлен для проверки в течение 1 недели с момента получения задания.
+
+### Notes, sources
+
+- This work states that best performance (lowest RMCE) for forecasting CPI data is shown by Elastic Net model (p5.1)
+- https://www.bis.org/ifc/publ/ifcb57_18.pdf
+
+- Using seasonal adjustments lower RMSE estimated by ~10% (p5.4)
+
+- CPI analysis with ML model "The consumer price index prediction using machine learning approaches: 
+Evidence from the United States" https://www.sciencedirect.com/science/article/pii/S2405844023079380

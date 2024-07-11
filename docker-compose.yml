@@ -6,8 +6,8 @@ services:
     expose:
       - "8000"
     restart: on-failure
-#    env_file:
-#      - .env
+    env_file:
+      - .env
     volumes:
       - .:/app
       - ./models/trained_models:/app/models/trained_models
