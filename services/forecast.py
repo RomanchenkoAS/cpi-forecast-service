@@ -1,20 +1,19 @@
 import io
 import os
 import pickle
-from datetime import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.ticker import MaxNLocator
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_squared_error
 
 import config
-from config import DATA_DIR, MODELS_DIR
+from config import MODELS_DIR
 from services.tools import slugify
 
 
-def load_data(product_name):
+def load_data(product_name: str) -> pd.DataFrame:
     """
     From csv with all data get data for product_name
     """
@@ -27,7 +26,7 @@ def load_data(product_name):
     return product_data
 
 
-def constrain_forecast(original, forecast, max_change=0.05):
+def constrain_forecast(original, forecast, max_change=0.05) -> list:
     """
     Limit predictions to a certain threshold
     """
@@ -42,7 +41,7 @@ def constrain_forecast(original, forecast, max_change=0.05):
     return constrained[1:]
 
 
-def get_model_dict(product_name):
+def get_model_dict(product_name: str) -> dict:
     """
     Load model from disk and return it as a dictionary
     """
@@ -53,7 +52,7 @@ def get_model_dict(product_name):
     return model
 
 
-def calculate_rmse(model, data):
+def calculate_rmse(model, data) -> float:
     in_sample_forecast = model.fittedvalues
     min_length = min(len(data["Price"]), len(in_sample_forecast))
     return mean_squared_error(
@@ -62,8 +61,8 @@ def calculate_rmse(model, data):
 
 
 def create_forecast_plot(
-    data, forecast_dates, forecast, product_name, train_mae, test_mae, rmse
-):
+        data, forecast_dates, forecast, product_name, train_mae, test_mae, rmse
+) -> io.BytesIO:
     plt.figure(figsize=(14, 7))
     plt.plot(data["Date"], data["Price"], label="Historical Data", marker="o")
     plt.plot(forecast_dates, forecast, label="Forecast", linestyle="--", marker="o")

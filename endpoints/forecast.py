@@ -51,8 +51,9 @@ def get_forecast_plot(product_name):
 @forecast_bp.route("/get_metadata/<product_name>")
 @cache.cached(timeout=60 * 60, query_string=True)
 def get_metadata(product_name):
-    from pprint import pprint
     model_dict = get_model_dict(product_name)
+
+    from pprint import pprint
     pprint(model_dict)
 
     # Prepare dict for sending

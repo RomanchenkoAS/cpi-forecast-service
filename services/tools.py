@@ -172,3 +172,12 @@ def check_models_availability() -> bool:
     models_available = len(model_files) > 0
 
     return data_file_exists and models_available
+
+
+def delete_files_in_directory(directory: str):
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        if os.path.isfile(file_path) or os.path.islink(file_path):
+            os.unlink(file_path)
+        elif os.path.isdir(file_path):
+            os.rmdir(file_path)
