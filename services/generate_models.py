@@ -178,7 +178,7 @@ def make_forecast(
     forecast = model_fit.forecast(steps=forecast_horizon)
 
     # Calculate prediction intervals
-    alpha = 0.05  # 95% confidence interval
+    # alpha = 0.05  # 95% confidence interval
     mean_squared_error = np.mean(model_fit.resid ** 2)
     standard_error = np.sqrt(mean_squared_error * (1 + np.arange(1, forecast_horizon + 1)))
     critical_value = 1.96  # Approximation for 95% CI (can use 1.645 for 90% CI)

@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, request, jsonify, redirect, url_fo
 from werkzeug.exceptions import HTTPException
 
 import config
+from cache import cache
 from services.auto_process_data import auto_process_data
 from services.tools import check_models_availability
 
@@ -104,6 +105,7 @@ def erase_models():
             elif os.path.isdir(file_path):
                 os.rmdir(file_path)
 
+        cache.clear()
         flash("Models successfully deleted.", "info")
         return jsonify({"success": True}), 200
     except Exception as e:

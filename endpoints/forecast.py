@@ -3,6 +3,7 @@ from datetime import datetime
 import pandas as pd
 from flask import Blueprint, send_file, jsonify
 
+from cache import cache
 from services.forecast import (
     calculate_rmse,
     constrain_forecast,
@@ -10,12 +11,12 @@ from services.forecast import (
     get_model_dict,
     load_data,
 )
-from services.tools import slugify
 
 forecast_bp = Blueprint("forecast", __name__)
 
 
 @forecast_bp.route("/forecast/<product_name>")
+@cache.cached(timeout=60 * 60, query_string=True)
 def get_forecast_plot(product_name):
     """
     Return plot as an image.
@@ -48,13 +49,14 @@ def get_forecast_plot(product_name):
 
 
 @forecast_bp.route("/get_metadata/<product_name>")
+@cache.cached(timeout=60 * 60, query_string=True)
 def get_metadata(product_name):
+    from pprint import pprint
     model_dict = get_model_dict(product_name)
-    metadata = {
-        "url": f"/forecast/{slugify(product_name)}",
-        "product_name": model_dict["product_name"],
-        "train_mae": model_dict["train_mae"],
-        "test_mae": model_dict["test_mae"],
-        "date_created": model_dict["date_created"].isoformat(),
-    }
-    return jsonify(metadata)
+    pprint(model_dict)
+
+    # Prepare dict for sending
+    model_dict['date_created'] = model_dict["date_created"].strftime("%Y-%m-%d %H:%M:%S")
+    model_dict.pop("model")
+
+    return jsonify(model_dict)
