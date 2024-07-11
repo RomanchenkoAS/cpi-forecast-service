@@ -19,7 +19,7 @@ forecast_bp = Blueprint("forecast", __name__)
 @cache.cached(timeout=60 * 60, query_string=True)
 def get_forecast_plot(product_name):
     """
-    Return plot as an image.
+    Return plot as an image for the given product name.
     """
     data = load_data(product_name)
     model_dict = get_model_dict(product_name)
@@ -51,13 +51,16 @@ def get_forecast_plot(product_name):
 @forecast_bp.route("/get_metadata/<product_name>")
 @cache.cached(timeout=60 * 60, query_string=True)
 def get_metadata(product_name):
-    model_dict = get_model_dict(product_name)
+    """
+    Return metadata for a given product.
+    """
+    try:
+        model_dict = get_model_dict(product_name)
 
-    from pprint import pprint
-    pprint(model_dict)
+        # Prepare dict for sending
+        model_dict['date_created'] = model_dict["date_created"].strftime("%Y-%m-%d %H:%M:%S")
+        model_dict.pop("model")
 
-    # Prepare dict for sending
-    model_dict['date_created'] = model_dict["date_created"].strftime("%Y-%m-%d %H:%M:%S")
-    model_dict.pop("model")
-
-    return jsonify(model_dict)
+        return jsonify(model_dict)
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500

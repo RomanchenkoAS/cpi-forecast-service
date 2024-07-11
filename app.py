@@ -5,8 +5,10 @@ from flask import Flask
 
 import config
 from cache import init_cache
+# endpoints
 from endpoints.forecast import forecast_bp
 from endpoints.main import main_bp
+from endpoints.models import models_bp
 from endpoints.products import products_bp
 from services.tools import ensure_directory_exists_and_writable
 
@@ -18,6 +20,7 @@ init_cache(app)
 app.register_blueprint(forecast_bp)
 app.register_blueprint(products_bp)
 app.register_blueprint(main_bp)
+app.register_blueprint(models_bp)
 
 if __name__ == "__main__":
     ensure_directory_exists_and_writable(config.DATA_DIR)
