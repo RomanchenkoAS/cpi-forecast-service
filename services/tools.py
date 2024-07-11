@@ -127,14 +127,20 @@ def ensure_directory_exists_and_writable(dir_path: str):
         try:
             # Modify directory permissions to be writable
             os.chmod(dir_path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
-            print(f"Permissions of directory '{dir_path}' have been modified to be writable.")  # logger.info
+            print(
+                f"Permissions of directory '{dir_path}' have been modified to be writable."
+            )  # logger.info
         except Exception as e:
-            raise PermissionError(f"Unable to modify permissions of directory '{dir_path}': {e}")
+            raise PermissionError(
+                f"Unable to modify permissions of directory '{dir_path}': {e}"
+            )
 
     if os.access(dir_path, os.W_OK):
         print(f"Directory '{dir_path}' is writable.")  # logger.info
     else:
-        raise PermissionError(f"Directory '{dir_path}' is not writable after attempting to modify permissions.")
+        raise PermissionError(
+            f"Directory '{dir_path}' is not writable after attempting to modify permissions."
+        )
 
 
 # def read_csv(file_name: str) -> pd.DataFrame:
@@ -165,7 +171,9 @@ def check_models_availability() -> bool:
     :return: True if both conditions are met, False otherwise
     """
     # Check if the CSV file exists and is readable
-    data_file_exists = os.path.isfile(config.DATA_FILE_PATH) and os.access(config.DATA_FILE_PATH, os.R_OK)
+    data_file_exists = os.path.isfile(config.DATA_FILE_PATH) and os.access(
+        config.DATA_FILE_PATH, os.R_OK
+    )
 
     # Check if there are .pkl files in the models directory
     model_files = glob.glob(os.path.join(config.MODELS_DIR, "*.pkl"))

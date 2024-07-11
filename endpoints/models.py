@@ -1,9 +1,12 @@
-from flask import jsonify, request, flash, Blueprint
+from flask import Blueprint, flash, jsonify, request
 from werkzeug.exceptions import HTTPException
 
 import config
 from cache import cache
-from services.process_data.auto_process_data import handle_model_upload, handle_model_creation_with_url
+from services.process_data.auto_process_data import (
+    handle_model_creation_with_url,
+    handle_model_upload,
+)
 from services.tools import check_models_availability, delete_files_in_directory
 
 models_bp = Blueprint("models", __name__)
@@ -21,7 +24,9 @@ def create_models():
     if request.method == "POST":
         return handle_model_upload(request.files)
     elif request.method == "GET":
-        return handle_model_creation_with_url(request.args.get("url", config.ROSSTAT_CPI_DATA_URL))
+        return handle_model_creation_with_url(
+            request.args.get("url", config.ROSSTAT_CPI_DATA_URL)
+        )
     else:
         raise HTTPException("Unsupported request method")
 

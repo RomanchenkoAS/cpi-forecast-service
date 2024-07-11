@@ -16,7 +16,7 @@ from services.tools import slugify
 
 
 def split_data(
-        df: pd.DataFrame, split_coefficient: float = 0.15
+    df: pd.DataFrame, split_coefficient: float = 0.15
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Split data into dev and test sets.
@@ -48,12 +48,12 @@ def split_data(
 
 
 def make_forecast(
-        product_name: str,
-        train_data: pd.DataFrame,
-        test_data: pd.DataFrame,
-        use_train_test_split: bool = True,
-        save_model: bool = False,
-        show_plot: bool = False,
+    product_name: str,
+    train_data: pd.DataFrame,
+    test_data: pd.DataFrame,
+    use_train_test_split: bool = True,
+    save_model: bool = False,
+    show_plot: bool = False,
 ) -> dict[str, Any]:
     """
     Create 6 months forecast models on provided data.
@@ -179,8 +179,10 @@ def make_forecast(
 
     # Calculate prediction intervals
     # alpha = 0.05  # 95% confidence interval
-    mean_squared_error = np.mean(model_fit.resid ** 2)
-    standard_error = np.sqrt(mean_squared_error * (1 + np.arange(1, forecast_horizon + 1)))
+    mean_squared_error = np.mean(model_fit.resid**2)
+    standard_error = np.sqrt(
+        mean_squared_error * (1 + np.arange(1, forecast_horizon + 1))
+    )
     critical_value = 1.96  # Approximation for 95% CI (can use 1.645 for 90% CI)
     lower_ci = forecast - critical_value * standard_error
     upper_ci = forecast + critical_value * standard_error

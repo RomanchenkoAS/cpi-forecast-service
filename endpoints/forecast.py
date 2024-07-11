@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import pandas as pd
-from flask import Blueprint, send_file, jsonify
+from flask import Blueprint, jsonify, send_file
 
 from cache import cache
 from services.forecast import (
@@ -58,7 +58,9 @@ def get_metadata(product_name):
         model_dict = get_model_dict(product_name)
 
         # Prepare dict for sending
-        model_dict['date_created'] = model_dict["date_created"].strftime("%Y-%m-%d %H:%M:%S")
+        model_dict["date_created"] = model_dict["date_created"].strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
         model_dict.pop("model")
 
         return jsonify(model_dict)

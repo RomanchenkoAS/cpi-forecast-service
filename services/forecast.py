@@ -61,7 +61,7 @@ def calculate_rmse(model, data) -> float:
 
 
 def create_forecast_plot(
-        data, forecast_dates, forecast, product_name, train_mae, test_mae, rmse
+    data, forecast_dates, forecast, product_name, train_mae, test_mae, rmse
 ) -> io.BytesIO:
     plt.figure(figsize=(14, 7))
     plt.plot(data["Date"], data["Price"], label="Historical Data", marker="o")

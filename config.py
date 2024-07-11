@@ -1,6 +1,5 @@
 import os
 
-
 ROSSTAT_BASE_URL = "https://rosstat.gov.ru/"
 ROSSTAT_CPI_DATA_URL = "https://rosstat.gov.ru/storage/mediabank/Nedel_ipc.xlsx"
 
