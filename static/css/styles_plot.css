@@ -65,6 +65,34 @@ select, button {
     text-align: center;
 }
 
+.switch-btn-container {
+    align-items: center;
+    display: flex;
+    justify-content: space-around;
+}
+
+.switch-btn {
+    min-width: 38px;
+    min-height: 38px;
+}
+
+#left-btn {
+    width: auto;
+    background-image: url('/static/arrow-left.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+
+}
+
+#right-btn {
+    background-image: url('/static/arrow-right.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+
+}
+
 @media (max-width: 900px) {
     .right-card {
         height: 100%;

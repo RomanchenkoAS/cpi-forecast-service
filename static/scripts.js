@@ -1,7 +1,40 @@
 document.addEventListener('DOMContentLoaded', function () {
     const productSelect = document.getElementById('product-select');
+    const leftBtn = document.getElementById('left-btn');
+    const rightBtn = document.getElementById('right-btn');
+    const getForecastBtn = document.getElementById('get-forecast');
+
+    function changeProductSelection(direction) {
+        const options = Array.from(productSelect.options);
+        const currentIndex = options.findIndex(option => option.selected);
+        let newIndex;
+
+        if (direction === 'left') {
+            newIndex = currentIndex > 0 ? currentIndex - 1 : options.length - 1;
+        } else if (direction === 'right') {
+            newIndex = currentIndex < options.length - 1 ? currentIndex + 1 : 0;
+        }
+
+        productSelect.selectedIndex = newIndex;
+        getForecast();
+    }
+
+    if (leftBtn && rightBtn) {
+        leftBtn.addEventListener('click', function () {
+            changeProductSelection('left');
+        });
+
+        rightBtn.addEventListener('click', function () {
+            changeProductSelection('right');
+        });
+    }
+
+    if (getForecastBtn) {
+        getForecastBtn.addEventListener('click', getForecast);
+    }
+
+
     if (productSelect) {
-        // Load product list only if #product-select is present
         fetch('/get_products')
             .then(response => response.json())
             .then(products => {
@@ -17,9 +50,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 });
             });
-
-        // Tie getForecast function to the button
-        document.getElementById('get-forecast').addEventListener('click', getForecast);
     }
 });
 
@@ -30,7 +60,7 @@ function getForecast() {
         fetch('/get_metadata/' + encodeURIComponent(productName))
             .then(response => response.json())
             .then(metadata => {
-                console.log(metadata);
+                // console.log(metadata);
                 document.getElementById('metadata').innerHTML = `
                     <h6>Metadata:</h6>
                     <p>Product: ${metadata.product_name}</p>
