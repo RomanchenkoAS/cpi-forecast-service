@@ -5,8 +5,9 @@ from werkzeug.exceptions import HTTPException
 
 import config
 from cache import cache
-from services.auto_process_data import auto_process_data
-from services.tools import check_models_availability
+from services.process_data.auto_process_data import handle_model_upload, \
+    handle_model_creation_with_url
+from services.tools import check_models_availability, delete_files_in_directory
 
 main_bp = Blueprint("main", __name__)
 
@@ -15,20 +16,19 @@ main_bp = Blueprint("main", __name__)
 def plot():
     if check_models_availability():
         return render_template("plot.html")
-    else:
-        flash("Models unavailable", "error")
-        return redirect(url_for("main.index"))
+    flash("Models unavailable", "error")
+    return redirect(url_for("main.index"))
 
 
 @main_bp.route("/")
 def index():
-    models_available = check_models_availability()
-    if models_available:
+    is_model_available: bool = check_models_availability()
+    if is_model_available:
         flash("Models are ready", "success")
-    return render_template("index.html", models_available=models_available)
+    return render_template("index.html", models_available=is_model_available)
 
 
-@main_bp.route("/download-sample", methods=["GET"])
+@main_bp.route("/download_sample", methods=["GET"])
 def download_sample_data():
     """
         Return to user sample data file.
@@ -44,67 +44,27 @@ def download_sample_data():
 
 @main_bp.route("/check_models")
 def check_models_availability_endpoint():
-    if check_models_availability():
-        return jsonify({"success": True}), 200
-    return jsonify({"success": False}), 200
+    is_model_available: bool = check_models_availability()
+    return jsonify({"success": is_model_available}), 200
 
 
 @main_bp.route("/models", methods=["GET", "POST"])
 def create_models():
+    """Endpoint to create models either by uploading a CSV file or using a custom URL."""
     if request.method == "POST":
-        # Endpoint to upload CSV file manually
-        if 'file' not in request.files:
-            return jsonify({"success": False, "error": "No file provided"}), 400
-
-        file = request.files['file']
-
-        if file.filename == '':
-            return jsonify({"success": False, "error": "No file provided"}), 400
-
-        if file and file.filename.endswith('.csv'):
-            file.save(config.DATA_FILE_PATH)
-            try:
-                auto_process_data()
-            except Exception as e:
-                return jsonify({"success": False, "error": str(e)})
-            return jsonify({"success": True}), 200
-        else:
-            return jsonify({"success": False, "error": "Invalid file type. Only CSV files are allowed."}), 400
-
+        return handle_model_upload(request.files)
     elif request.method == "GET":
-        # Custom URL from user: this feature is not implemented on front-end.
-        download_url = request.args.get("url", config.ROSSTAT_CPI_DATA_URL)
-        try:
-            try:
-                auto_process_data(data_download_url=download_url)
-            except Exception as e:
-                return jsonify({"success": False, "error": str(e)})
-            return jsonify({"success": True}), 200
-        except Exception as e:
-            return jsonify({"success": False, "error": str(e)}), 500
+        return handle_model_creation_with_url(request.args.get("url", config.ROSSTAT_CPI_DATA_URL))
     else:
         raise HTTPException("Unsupported request method")
 
 
 @main_bp.route("/erase")
 def erase_models():
+    """Endpoint to erase all models and clear the cache."""
     try:
-        # Delete all contents in config.DATA_DIR
-        for filename in os.listdir(config.DATA_DIR):
-            file_path = os.path.join(config.DATA_DIR, filename)
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                os.rmdir(file_path)
-
-        # Delete all contents in config.MODELS_DIR
-        for filename in os.listdir(config.MODELS_DIR):
-            file_path = os.path.join(config.MODELS_DIR, filename)
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                os.rmdir(file_path)
-
+        delete_files_in_directory(config.DATA_DIR)
+        delete_files_in_directory(config.MODELS_DIR)
         cache.clear()
         flash("Models successfully deleted.", "info")
         return jsonify({"success": True}), 200
